@@ -1,0 +1,46 @@
+Sample application for performing measurements and comparisons when *JAsyncAgent* enabled and not. It sends HTTP requests using HttpURLConnection and prints time consumed.
+
+* Usage
+
+#+BEGIN_EXAMPLE
+LD_LIBRARY_PATH=$JASYNCAGENT_DIR LD_PRELOAD=$JASYNCAGENT_DIR/libjasyncagentpreload.so java -cp $JASYNCAGENT_DIR/jasyncagent.jar -agentlib:jasyncagent -jar release/standalone-tests.jar
+#+END_EXAMPLE
+
+* Results
+
+Used version of Java is 1.8.0_77.
+Requests send to http://localhost:8080/bashStub
+
+** request/response
+
+Sending 100 POST requests to a servlet. Body contains only request id. Servlet replies with id back and "Very long text" string.
+
+With JAsyncAgent
+Elapsed time: 1618ms
+-
+With ForkJoinPool
+Elapsed time: 328ms
+-
+
+** request/1 sec sleep/response
+
+Same as before except servlet after receiving the request makes sleep for 1 second and then replies.
+
+With JAsyncAgent
+Elapsed time: 2341ms
+-
+With ForkJoinPool
+Elapsed time: 13268ms
+-
+
+** request/300 msec sleep/response
+
+Same as before except servlet after receiving the request makes sleep for 300 milliseconds and then replies.
+
+With JAsyncAgent
+Elapsed time: 2240ms
+-
+With ForkJoinPool
+Elapsed time: 6824ms
+-
+

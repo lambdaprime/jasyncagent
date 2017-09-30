@@ -1,0 +1,50 @@
+*JAsyncAgent* - java agent which provides asynchronous nonblocking IO through coroutines. 
+Some of the *JAsyncAgent* benefits in comparison to callback solutions are:
+
+- no need to learn sophisticated APIs. To use *JAsyncAgent* you need to call only three methods: start, stop and addRunnable. There is no need to implement any foreign interfaces or introduce some helper classes as well.
+- callbacks are not readable and they make source code harder to maintain, with *JAsyncAgent* you code stays as it is
+- with coroutines you don't need to change the structure of your source code, which means that you can achieve nonblocking IO in legacy projects with a small cost
+- with coroutines it is possible to have async IO even if you are using 3party library which supports only sync operations (for example Apache HttpClient)
+
+To use *JAsyncAgent* you wrap the code which somewhere deep in its execution flow performs an IO operation into java.lang.Runnable and add it into *JAsyncAgent* queue. *JAsyncAgent* keeps only one single thread for execution of Runnables from its queue. Once Runnable execution reaches blocking IO operation *JAsyncAgent* will stop executing it and switch to another Runnable which is ready to be executed.
+
+lambdaprime <id.blackmesa@gmail.com>
+
+* Use cases
+
+According to Servlet spec "Web containers in application servers normally use a server thread per client request.". It means that if your web service communicates with another web service which will have to do some job before replying back the thread of the first web service will be blocked and do nothing instead of serving other clients.
+*JAsyncAgent* minimizes the idle time and once thread is blocked it switched to process another client request.
+
+* Implementation details
+
+*JAsyncAgent* keeps single Looper thread which constantly reads a Runnables from the queue one by one and executes them. When Runnable will call any native Java socket function *JAsyncAgent* will intercept it, register Runnable in the Reactor and yield execution back to Looper. 
+
+Reactor it is an event dispatching component which monitors multiple sockets. Once socket became ready for IO operation Reactor will put its Runnable back to the queue so Looper will pick it up again and resume execution from the point where blocking IO operation has been called.
+
+Since Java does not provide coroutines *JAsyncAgent* uses ucontext to switch the contexts.
+
+* Usage
+
+** Start JVM:
+
+1. Set environment variables:
+
+   LD_LIBRARY_PATH=JASYNCAGENT_DIR
+   LD_PRELOAD=JASYNCAGENT_DIR/libjasynagentpreload.so
+
+   Where:
+
+   JASYNCAGENT_DIR -- path to directory where libjasynagent.so is located
+
+2. Specify following arguments to JVM:
+
+   -agentlib:jasyncagent
+
+** API
+
+Refer to *JAsyncAgent* javadoc.
+
+* Current limitations
+
+Tested on Linux only.
+Only Java socket operations are covered.

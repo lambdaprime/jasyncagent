@@ -1,0 +1,44 @@
+Servlet for testing, making performance measurements of *JAsyncAgent* when operated on application servers.
+
+* Startup
+
+#+BEGIN_EXAMPLE
+TOMEE=~/src/apache-tomee-plus-7.0.2/bin
+LD_LIBRARY_PATH=$JASYNCAGENT_DIR LD_PRELOAD=$JASYNCAGENT_DIR/libjasyncagentpreload.so JAVA_OPTS=-agentlib:jasyncagent $TOMEE/startup.sh 
+#+END_EXAMPLE
+
+Where JASYNCAGENT_DIR directory with JAsyncAgent binaries.
+
+* Usage
+
+#+BEGIN_EXAMPLE
+curl -vvv -XGET http://localhost:8080/jasyncagent-tests/jasyncagent
+#+END_EXAMPLE
+
+Using *JMeter*:
+
+#+BEGIN_EXAMPLE
+jmeter -n -t jasyncagent.jmx
+#+END_EXAMPLE
+
+* Results
+
+** Calling other web service which replies instantly
+
+Without *JAsyncAgent*
+
+[[./jmeter/stat-no-delay/async.png]]
+
+With *JAsyncAgent*
+
+[[./jmeter/stat-no-delay/jasyncagent.png]]
+ 
+** Calling other web service which takes 1 second to reply
+
+Without *JAsyncAgent*
+
+[[./jmeter/stat-1sec-delay/async.png]]
+
+With *JAsyncAgent*
+
+[[./jmeter/stat-1sec-delay/jasyncagent.png]]
